@@ -1,45 +1,89 @@
-// server/index.js
 const express = require('express');
 const mysql = require('mysql2');
-const cors = require('cors');  // Importar el módulo cors
+const cors = require('cors');
 
 const app = express();
 const PORT = 3001;
 
 // Middleware
-app.use(cors()); // Permitir solicitudes desde otros dominios
-app.use(express.json()); // Para procesar datos JSON en las solicitudes
+app.use(cors());
+app.use(express.json());
 
 // Configurar la conexión a la base de datos MySQL
 const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'root123C!',
-  database: 'tuberculosis',
+    host: 'localhost',
+    user: 'root',
+    password: 'Luxxo.2004', // Asegúrate de cambiar esto por tu contraseña real
+    database: 'tuberculosis',
 });
 
 // Conectar a la base de datos
-db.connect((err) => {
-  if (err) {
-    console.log('Error connecting to the database:', err);
-    return;
-  }
-  console.log('Connected to the MySQL database');
+db.connect(err => {
+    if (err) {
+        console.log('Error connecting to the database:', err);
+        return;
+    }
+    console.log('Connected to the MySQL database');
 });
 
-
-// Rutas
-app.get('/api/redsalud', (req, res) => {
-  const query = 'SELECT * FROM tuberculosis.redsalud;'; // Asegúrate de que 'foods' sea el nombre correcto de la tabla
-  db.query(query, (err, result) => {
-    if (err) {
-      return res.status(500).send(err);
-    }
-    res.json(result); // Devuelve los datos en formato JSON
+// Ruta para obtener los datos de un paciente específico
+app.get('/api/getPaciente/:idPersona', (req, res) => {
+  const { idPersona } = req.params;
+  const query = 'SELECT * FROM persona WHERE idPersona = ? AND rol = "paciente"';
+  db.query(query, [idPersona], (err, result) => {
+      if (err) {
+          console.error('Error fetching paciente:', err);
+          return res.status(500).json({ error: 'Internal Server Error' });
+      }
+      if (result.length === 0) {
+          return res.status(404).json({ error: 'Paciente no encontrado' });
+      }
+      res.json(result[0]);
   });
 });
 
+//
+app.get('/api/pacientes', (req, res) => {
+  db.query('SELECT * FROM persona WHERE rol = "paciente"', (err, results) => {
+      if (err) {
+          console.error('Error fetching pacientes:', err);
+          res.status(500).send(err);
+          return;
+      }
+      res.json(results);
+  });
+});
+
+// Ruta para actualizar un paciente
+app.put('/api/updatePaciente/:idPersona', (req, res) => {
+    const { idPersona } = req.params;
+    const { primerNomrbe, primerApellido, numeroCelular, CI, usuario, correo } = req.body;
+    const query = 'UPDATE persona SET primerNomrbe = ?, primerApellido = ?, numeroCelular = ?, CI = ?, usuario = ?, correo = ? WHERE idPersona = ? AND rol = "paciente";';
+    db.query(query, [primerNomrbe, primerApellido, numeroCelular, CI, usuario, correo, idPersona], (err, result) => {
+        if (err) {
+            console.error('Error updating paciente:', err);
+            return res.status(500).send(err);
+        }
+        if (result.affectedRows === 0) {
+            return res.status(404).send('Paciente no encontrado');
+        }
+        res.send('Paciente actualizado con éxito');
+    });
+});
+//
+app.get('/api/redsalud', (req, res) => {
+  const query = 'SELECT * FROM redSalud'; // Asegúrate de que 'redSalud' es el nombre correcto de tu tabla
+  db.query(query, (err, results) => {
+      if (err) {
+          console.error('Error fetching redes de salud:', err);
+          return res.status(500).send(err);
+      }
+      res.json(results);
+  });
+});
+
+
 // Iniciar el servidor
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running on http://localhost:${PORT}`);
 });
