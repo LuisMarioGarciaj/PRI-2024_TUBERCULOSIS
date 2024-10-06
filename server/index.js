@@ -14,7 +14,7 @@ app.use(express.json()); // Para procesar datos JSON en las solicitudes
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: 'YOUNGE8H2S1re',  // DEBE CAMBIAR LA CONTRASEÑA
+  password: '*************',  // DEBE CAMBIAR LA CONTRASEÑA
   database: 'tuberculosis',
 });
 
