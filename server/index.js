@@ -14,7 +14,7 @@ app.use(express.json()); // Para procesar datos JSON en las solicitudes
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: '*************',  // DEBE CAMBIAR LA CONTRASEÑA
+  password: 'YOUNGE8H2S1re',  // DEBE CAMBIAR LA CONTRASEÑA
   database: 'tuberculosis',
 });
 
@@ -88,10 +88,38 @@ app.get('/api/admin-data', verifyRole('administrador'), (req, res) => {
 });
 
 
+/* ****************************************************** */
+/* ********************** PACIENTES ********************* */
+/* ****************************************************** */
+// PACIENTES 
+app.get('/api/pacientes', (req, res) => {
+  const query = ` SELECT idPersona, CONCAT(primerNombre, ' ', IFNULL(segundoNombre,''), ' ', primerApellido, ' ', IFNULL(segundoApellido,'')) AS nombreCompleto, CI
+                  FROM persona
+                  WHERE rol = 'paciente';`;
+  db.query(query, (error, result) => {
+    if (error) {
+      return res.status(500).send(error);
+    }
+    res.json(result);
+  });
+});
 
 
-
-
+/* ****************************************************** */
+/* ******************* PERSONAL MÉDICO ****************** */
+/* ****************************************************** */
+// PERSONAL MEDICO
+app.get('/api/medicos', (req, res) => {
+  const query = ` SELECT idPersona, CONCAT(primerNombre, ' ', IFNULL(segundoNombre,''), ' ', primerApellido, ' ', IFNULL(segundoApellido,'')) AS nombreCompleto, CI, correo, numeroCelular
+                  FROM persona
+                  WHERE rol = 'doctor';`;
+  db.query(query, (error, result) => {
+    if (error) {
+      return res.status(500).send(error);
+    }
+    res.json(result);
+  });
+});
 
 
 
