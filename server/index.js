@@ -15,6 +15,7 @@ const db = mysql.createConnection({
     user: 'root',
     password: 'Luxxo.2004', // Asegúrate de cambiar esto por tu contraseña real
     database: 'tuberculosis',
+    port: 3306
 });
 
 // Conectar a la base de datos
@@ -55,21 +56,26 @@ app.get('/api/pacientes', (req, res) => {
 });
 
 // Ruta para actualizar un paciente
+// Ruta para actualizar un paciente
 app.put('/api/updatePaciente/:idPersona', (req, res) => {
-    const { idPersona } = req.params;
-    const { primerNomrbe, primerApellido, numeroCelular, CI, usuario, correo } = req.body;
-    const query = 'UPDATE persona SET primerNomrbe = ?, primerApellido = ?, numeroCelular = ?, CI = ?, usuario = ?, correo = ? WHERE idPersona = ? AND rol = "paciente";';
-    db.query(query, [primerNomrbe, primerApellido, numeroCelular, CI, usuario, correo, idPersona], (err, result) => {
-        if (err) {
-            console.error('Error updating paciente:', err);
-            return res.status(500).send(err);
-        }
-        if (result.affectedRows === 0) {
-            return res.status(404).send('Paciente no encontrado');
-        }
-        res.send('Paciente actualizado con éxito');
-    });
+  const { idPersona } = req.params;
+  const { primerNomrbe, primerApellido, numeroCelular, CI, usuario, correo } = req.body;
+  console.log("Datos recibidos para actualizar:", req.body);
+  const query = 'UPDATE persona SET primerNomrbe = ?, primerApellido = ?, numeroCelular = ?, CI = ?, usuario = ?, correo = ? WHERE idPersona = ? AND rol = "paciente";';
+ 
+  db.query(query, [primerNomrbe, primerApellido, numeroCelular, CI, usuario, correo, idPersona], (err, result) => {
+      if (err) {
+          console.error('Error updating paciente:', err);
+          return res.status(500).json({ error: 'Error updating paciente', details: err });
+      }
+      console.log('Filas afectadas:', result.affectedRows); 
+      if (result.affectedRows === 0) {
+          return res.status(404).json({ error: 'Paciente no encontrado' });
+      }
+      res.json({ message: 'Paciente actualizado con éxito' });
+  });
 });
+
 //
 app.get('/api/redsalud', (req, res) => {
   const query = 'SELECT * FROM redSalud'; // Asegúrate de que 'redSalud' es el nombre correcto de tu tabla
